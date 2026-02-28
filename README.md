@@ -1,5 +1,4 @@
-<img width="286" height="190" alt="image" src="https://github.com/user-attachments/assets/e64277f8-3c91-4199-b3bf-0687c0ea666f" />
-# HACK-FOR-HUMANITY 
+# HACK-FOR-HUMANITY <img width="286" height="190" alt="image" src="https://github.com/user-attachments/assets/e64277f8-3c91-4199-b3bf-0687c0ea666f" />
 
 
 TOPIC  - WASTE MANAGMENT
