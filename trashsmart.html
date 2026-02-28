@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TrashSmart — Recycle Right</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0d1a0e;
+    --surface: #132015;
+    --surface2: #1c2e1e;
+    --border: #2a3f2c;
+    --green: #4ade80;
+    --green-dim: #22c55e;
+    --green-glow: #4ade8033;
+    --amber: #fbbf24;
+    --blue: #60a5fa;
+    --red: #f87171;
+    --text: #e8f5e9;
+    --text-dim: #7a9b7d;
+    --text-muted: #4a664d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 60% at 20% 10%, #1a3d1a44 0%, transparent 60%),
+                radial-gradient(ellipse 60% 80% at 80% 90%, #0d2a1044 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .grain {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  }
+
+  /* Layout */
+  .wrapper { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* Header */
+  header {
+    padding: 40px 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -.02em;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 10px;
+    display: grid; place-items: center;
+    font-size: 1rem;
+  }
+
+  .logo span { color: var(--green); }
+
+  nav { display: flex; gap: 4px; }
+
+  .nav-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .85rem; font-weight: 500;
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all .2s;
+  }
+
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .nav-btn.active { color: var(--green); }
+
+  /* Tabs */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Hero */
+  .hero { text-align: center; margin-bottom: 48px; }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 .accent { color: var(--green); }
+
+  .hero p {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    max-width: 500px;
+    margin: 0 auto;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color .2s;
+  }
+
+  .card:hover { border-color: #3a5c3c; }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .75rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  /* Search */
+  .search-area {
+    display: flex; gap: 12px; margin-bottom: 12px;
+  }
+
+  .search-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .95rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-input:focus {
+    border-color: var(--green-dim);
+    box-shadow: 0 0 0 3px var(--green-glow);
+  }
+
+  .btn {
+    background: var(--green);
+    color: #0a1a0a;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: #86efac; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { background: var(--surface2); color: var(--text-muted); cursor: not-allowed; transform: none; }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .btn-outline:hover { border-color: var(--green-dim); color: var(--green); }
+
+  /* Quick chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: .8rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .chip:hover { border-color: var(--green-dim); color: var(--green); background: var(--green-glow); }
+
+  /* Result */
+  .result-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 20px;
+    display: none;
+    animation: fadeUp .3s ease;
+  }
+
+  .result-box.visible { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+  }
+
+  .bin-badge {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .bin-badge.recycle { background: #1a3a5c; }
+  .bin-badge.compost  { background: #2a3a0a; }
+  .bin-badge.landfill { background: #3a1a0a; }
+  .bin-badge.special  { background: #2a1a3a; }
+
+  .bin-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+
+  .bin-sub { font-size: .85rem; color: var(--text-dim); margin-top: 2px; }
+
+  .result-tips { list-style: none; }
+  .result-tips li {
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+    font-size: .9rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    display: flex; gap: 10px;
+  }
+
+  .result-tips li::before { content: '→'; color: var(--green); flex-shrink: 0; }
+
+  /* Impact chips */
+  .impact-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .impact-tag {
+    background: var(--green-glow);
+    border: 1px solid #2d5a30;
+    color: var(--green);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: .75rem;
+    font-weight: 500;
+  }
+
+  /* Loading */
+  .loading {
+    display: none;
+    align-items: center; gap: 12px;
+    color: var(--text-dim);
+    font-size: .9rem;
+    margin-top: 20px;
+  }
+
+  .loading.visible { display: flex; }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Tracker */
+  .log-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label { font-size: .75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
+
+  /* Log item */
+  .log-form { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+
+  .log-select {
+    flex: 1; min-width: 140px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .log-select:focus { border-color: var(--green-dim); }
+
+  .log-list { list-style: none; }
+
+  .log-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    animation: fadeUp .2s ease;
+  }
+
+  .log-item-left { display: flex; align-items: center; gap: 10px; }
+  .log-item-icon { font-size: 1.2rem; }
+  .log-item-name { font-size: .9rem; }
+  .log-item-meta { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+
+  .log-item-badge {
+    font-size: .7rem; font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .badge-recycle { background: #1a3a5c; color: var(--blue); }
+  .badge-compost  { background: #2a3a0a; color: #86efac; }
+  .badge-landfill { background: #3a1a0a; color: #fca5a5; }
+  .badge-special  { background: #2a1a3a; color: #c4b5fd; }
+
+  /* Badges / achievements */
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+  }
+
+  .badge-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    text-align: center;
+    transition: all .2s;
+  }
+
+  .badge-card.earned { border-color: #2d5a30; background: #132015; }
+  .badge-card.earned:hover { border-color: var(--green); transform: translateY(-2px); }
+
+  .badge-card.locked { opacity: .4; }
+
+  .badge-emoji { font-size: 2rem; margin-bottom: 10px; display: block; }
+
+  .badge-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: .85rem;
+    margin-bottom: 4px;
+  }
+
+  .badge-desc { font-size: .75rem; color: var(--text-dim); line-height: 1.4; }
+  .badge-earned-tag { font-size: .7rem; color: var(--green); margin-top: 6px; font-weight: 600; }
+
+  /* Streak */
+  .streak-bar {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+
+  .streak-day {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: grid; place-items: center;
+    font-size: .65rem; color: var(--text-muted);
+  }
+
+  .streak-day.done {
+    background: var(--green-glow);
+    border-color: var(--green-dim);
+    color: var(--green);
+    font-size: .9rem;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px; right: 32px;
+    background: var(--surface);
+    border: 1px solid var(--green-dim);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: .9rem;
+    color: var(--text);
+    z-index: 999;
+    transform: translateY(80px); opacity: 0;
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    display: flex; align-items: center; gap: 10px;
+    max-width: 320px;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* Progress bar */
+  .progress-wrap { margin: 8px 0 4px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: .75rem; color: var(--text-muted); margin-bottom: 6px; }
+  .progress-track { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 4px; transition: width .5s ease; }
+
+  /* CO2 viz */
+  .co2-equiv {
+    background: var(--green-glow);
+    border: 1px solid #2d5a30;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-top: 16px;
+    display: flex; align-items: center; gap: 14px;
+  }
+
+  .co2-icon { font-size: 2rem; }
+  .co2-text { font-size: .9rem; color: var(--text-dim); line-height: 1.5; }
+  .co2-text strong { color: var(--green); font-size: 1.05rem; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: .78rem;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+    margin-top: 60px;
+  }
+
+  @media (max-width: 600px) {
+    header { flex-direction: column; gap: 16px; align-items: flex-start; }
+    nav { flex-wrap: wrap; }
+    .search-area { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="wrapper">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">♻️</div>
+      Trash<span>Smart</span>
+    </div>
+    <nav>
+      <button class="nav-btn active" onclick="switchTab('scan')">Scan Item</button>
+      <button class="nav-btn" onclick="switchTab('tracker')">My Tracker</button>
+      <button class="nav-btn" onclick="switchTab('impact')">Impact</button>
+    </nav>
+  </header>
+
+  <!-- SCAN TAB -->
+  <div id="tab-scan" class="tab-panel active">
+    <div class="hero">
+      <h1>What goes<br/><span class="accent">where?</span></h1>
+      <p>Describe any item and instantly find out how to dispose of it — recycling, composting, landfill, or special drop-off.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Identify Item</div>
+      <div class="search-area">
+        <input id="itemInput" class="search-input" placeholder="e.g. pizza box, AA battery, glass bottle…" onkeydown="if(event.key==='Enter') analyzeItem()"/>
+        <button class="btn" onclick="analyzeItem()" id="analyzeBtn">Analyze →</button>
+      </div>
+      <div class="chips" id="quickChips">
+        <span class="chip" onclick="quickSearch('Pizza box')">🍕 Pizza box</span>
+        <span class="chip" onclick="quickSearch('Glass wine bottle')">🍷 Glass bottle</span>
+        <span class="chip" onclick="quickSearch('AA battery')">🔋 AA battery</span>
+        <span class="chip" onclick="quickSearch('Banana peel')">🍌 Banana peel</span>
+        <span class="chip" onclick="quickSearch('Plastic bag')">🛍️ Plastic bag</span>
+        <span class="chip" onclick="quickSearch('Cardboard box')">📦 Cardboard</span>
+        <span class="chip" onclick="quickSearch('Old smartphone')">📱 Old phone</span>
+        <span class="chip" onclick="quickSearch('Styrofoam cup')">☕ Styrofoam</span>
+        <span class="chip" onclick="quickSearch('Newspaper')">📰 Newspaper</span>
+        <span class="chip" onclick="quickSearch('Used cooking oil')">🫙 Cooking oil</span>
+      </div>
+
+      <div class="loading" id="loadingEl">
+        <div class="spinner"></div>
+        <span>Checking disposal guidelines…</span>
+      </div>
+
+      <div class="result-box" id="resultBox">
+        <div class="result-header">
+          <div class="bin-badge" id="binBadge">
+            <span id="binIcon"></span>
+          </div>
+          <div>
+            <div class="bin-label" id="binLabel"></div>
+            <div class="bin-sub" id="binSub"></div>
+          </div>
+        </div>
+        <ul class="result-tips" id="tipsList"></ul>
+        <div class="impact-row" id="impactTags"></div>
+        <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn" onclick="logCurrentItem()" id="logBtn" style="font-size:.85rem; padding:10px 16px;">✓ Log this item</button>
+          <button class="btn-outline" onclick="clearResult()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACKER TAB -->
+  <div id="tab-tracker" class="tab-panel">
+    <div class="hero">
+      <h1>Your <span class="accent">waste</span><br/>journal</h1>
+      <p>Log every item you dispose of and watch your eco-habits build up over time.</p>
+    </div>
+
+    <div class="log-grid" id="statsGrid">
+      <div class="stat-box"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Items Logged</div></div>
+      <div class="stat-box"><div class="stat-num" id="statRecycle">0</div><div class="stat-label">Recycled</div></div>
+      <div class="stat-box"><div class="stat-num" id="statCompost">0</div><div class="stat-label">Composted</div></div>
+      <div class="stat-box"><div class="stat-num" id="statStreak">0🔥</div><div class="stat-label">Day Streak</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Weekly Streak</div>
+      <div class="streak-bar" id="streakBar"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Log New Item</div>
+      <div class="log-form">
+        <input class="search-input" id="logItemName" placeholder="Item name (e.g. tin can)" style="flex:2"/>
+        <select class="log-select" id="logCategory">
+          <option value="recycle">♻️ Recycle</option>
+          <option value="compost">🌱 Compost</option>
+          <option value="landfill">🗑️ Landfill</option>
+          <option value="special">⚡ Special</option>
+        </select>
+        <button class="btn" onclick="addLogItem()">Log</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Log</div>
+      <ul class="log-list" id="logList">
+        <li style="color:var(--text-muted); font-size:.9rem; padding:16px 0; text-align:center;">No items logged yet. Start scanning!</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Achievements</div>
+      <div class="badges-grid" id="badgesGrid"></div>
+    </div>
+  </div>
+
+  <!-- IMPACT TAB -->
+  <div id="tab-impact" class="tab-panel">
+    <div class="hero">
+      <h1>Your <span class="accent">real-world</span><br/>impact</h1>
+      <p>See how your recycling habits translate into measurable environmental change.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Environmental Savings Estimate</div>
+      <div id="impactDetails">
+        <p style="color:var(--text-dim); font-size:.9rem;">Log items in the tracker to see your impact grow here.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Why Recycling Matters</div>
+      <div style="display:grid; gap:16px;">
+        <div class="co2-equiv">
+          <div class="co2-icon">🌍</div>
+          <div class="co2-text">Recycling <strong>1 ton of paper</strong> saves 17 trees and 7,000 gallons of water.</div>
+        </div>
+        <div class="co2-equiv">
+          <div class="co2-icon">⚡</div>
+          <div class="co2-text">Recycling <strong>1 aluminum can</strong> saves enough energy to power a TV for 3 hours.</div>
+        </div>
+        <div class="co2-equiv">
+          <div class="co2-icon">🐠</div>
+          <div class="co2-text">Over <strong>8 million tons</strong> of plastic enter our oceans every year — proper disposal makes a difference.</div>
+        </div>
+        <div class="co2-equiv">
+          <div class="co2-icon">🌱</div>
+          <div class="co2-text">Composting <strong>food waste</strong> reduces methane emissions and creates nutrient-rich soil.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Your Disposal Breakdown</div>
+      <div id="breakdownChart" style="display:flex; flex-direction:column; gap:12px;"></div>
+    </div>
+  </div>
+
+  <footer>
+    TrashSmart — Hack for Humanity 2026 &nbsp;•&nbsp; Built to reduce waste, one item at a time.
+  </footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+
+const DISPOSAL_DB = {
+  // Recyclables
+  "pizza box": { bin:"recycle", conditional:true, icon:"📦", label:"Recycle (if clean)", sub:"Blue / paper recycling bin", tips:["Remove any food residue — even a thin grease layer can contaminate a batch","Tear off the clean top lid and recycle it; discard the greasy bottom in landfill","Flatten to save bin space"], tags:["Reduces landfill","Saves trees","♻️ Paper stream"], co2: 0.2 },
+  "glass bottle": { bin:"recycle", icon:"🍾", label:"Recycle", sub:"Glass recycling bin or drop-off", tips:["Rinse the bottle — a quick rinse is enough, no need to scrub","Remove metal lids and recycle separately","Do not break — intact glass is easier to sort at the facility"], tags:["Saves energy","Infinite recyclability","♻️ Glass stream"], co2: 0.3 },
+  "glass wine bottle": { bin:"recycle", icon:"🍷", label:"Recycle", sub:"Glass recycling bin or drop-off", tips:["Rinse and remove the cork (compost cork if natural)","Metal foil capsule — check local rules, often landfill","Glass can be recycled endlessly without quality loss"], tags:["Saves energy","♻️ Glass stream"], co2: 0.3 },
+  "aa battery": { bin:"special", icon:"🔋", label:"Special Disposal", sub:"Battery drop-off or hazardous waste", tips:["Never put in regular trash — batteries contain heavy metals that leach into soil","Many hardware stores (Home Depot, IKEA) have free battery collection boxes","Tape the terminals with masking tape to prevent short-circuiting during transport"], tags:["Prevents soil contamination","Recovers metals","⚠️ Hazardous"], co2: 0.1 },
+  "banana peel": { bin:"compost", icon:"🍌", label:"Compost", sub:"Green / organics bin or home compost", tips:["Ideal brown-green balance for home composting","Breaks down within 2–5 weeks in active compost","Can also be used as fertilizer directly around plants"], tags:["Returns nutrients to soil","Reduces methane","🌱 Organic"], co2: 0.05 },
+  "plastic bag": { bin:"special", icon:"🛍️", label:"Special — Store Drop-off", sub:"DO NOT put in curbside recycling", tips:["Curbside recycling machines can't process plastic film — it jams the sorting equipment","Many grocery stores have a plastic film return bin near the entrance","Reuse as many times as possible before recycling"], tags:["Prevents ocean pollution","⚠️ Film plastic"], co2: 0.15 },
+  "cardboard box": { bin:"recycle", icon:"📦", label:"Recycle", sub:"Paper / cardboard recycling bin", tips:["Flatten completely to maximize bin space","Remove any tape or foam inserts","Keep dry — wet cardboard breaks down and can't be recycled"], tags:["Saves trees","♻️ Paper stream","Widely accepted"], co2: 0.25 },
+  "cardboard": { bin:"recycle", icon:"📦", label:"Recycle", sub:"Paper / cardboard recycling bin", tips:["Flatten completely before placing in bin","Remove tape, labels, and packing materials first","Wet cardboard goes to landfill"], tags:["Saves trees","♻️ Paper stream"], co2: 0.25 },
+  "old smartphone": { bin:"special", icon:"📱", label:"E-Waste Drop-off", sub:"Electronics recycler or manufacturer take-back", tips:["Factory reset and remove your SIM card before dropping off","Best Buy, Apple Stores, and many libraries accept old phones for free","Phones contain gold, silver, and rare earth metals that can be recovered"], tags:["Recovers rare metals","Prevents toxic waste","⚡ E-Waste"], co2: 0.5 },
+  "styrofoam cup": { bin:"landfill", icon:"☕", label:"Landfill", sub:"General waste bin", tips:["Most curbside programs do not accept styrofoam (polystyrene)","Some specialty recyclers (check Earth911.com) may accept it in bulk","Consider switching to a reusable cup — best environmental option"], tags:["Non-recyclable locally","Takes 500+ years to decompose"], co2: 0 },
+  "newspaper": { bin:"recycle", icon:"📰", label:"Recycle", sub:"Paper / mixed recycling bin", tips:["No need to remove staples — recycling facilities can handle them","Keep dry; wet newspaper reduces recyclability","Shredded newspaper can also go in compost as a brown material"], tags:["Saves trees","♻️ Paper stream","High-value recyclable"], co2: 0.2 },
+  "cooking oil": { bin:"special", icon:"🫙", label:"Special Disposal", sub:"Cooking oil collection or biodiesel drop-off", tips:["Never pour oil down the drain — it clogs pipes and harms waterways","Let it solidify (for small amounts) and dispose in a sealed container in landfill","Many restaurants and biodiesel programs accept used cooking oil for free"], tags:["Prevents water pollution","Can become biofuel","⚠️ Liquid waste"], co2: 0.1 },
+  "used cooking oil": { bin:"special", icon:"🫙", label:"Special Disposal", sub:"Cooking oil collection or biodiesel drop-off", tips:["Never pour oil down the drain — it clogs pipes and harms waterways","Solidify small amounts and seal in a container before placing in trash","Many cities have cooking oil drop-off programs that convert it to biofuel"], tags:["Prevents water pollution","Can become biofuel"], co2: 0.1 },
+  "tin can": { bin:"recycle", icon:"🥫", label:"Recycle", sub:"Metal / mixed recycling bin", tips:["Rinse out — no need to be spotless, just remove major food residue","Leave the lid attached (tuck it inside) to avoid sharp edges","Labels do not need to be removed"], tags:["Saves mining energy","♻️ Metal stream","Infinitely recyclable"], co2: 0.35 },
+  "aluminum can": { bin:"recycle", icon:"🥤", label:"Recycle", sub:"Metal / mixed recycling bin", tips:["One of the most valuable recyclables — recycling aluminum uses 95% less energy than making new","Crush to save space, or leave intact — both are fine","Make sure it's empty; liquids contaminate other recyclables"], tags:["High energy savings","♻️ Metal stream","Most valuable recyclable"], co2: 0.4 },
+  "water bottle": { bin:"recycle", icon:"💧", label:"Recycle", sub:"Plastic recycling (check local rules)", tips:["Empty and briefly rinse the bottle","Leave the cap on — many facilities can now process caps attached","Flatten to reduce volume in the bin"], tags:["♻️ Plastic stream","Check local rules"], co2: 0.2 },
+  "egg carton": { bin:"compost", icon:"🥚", label:"Compost", sub:"Paper egg carton → compost or recycle", tips:["Cardboard egg cartons are accepted in most recycling programs","They also make excellent compost material (brown/carbon layer)","Foam egg cartons go in landfill — not recyclable"], tags:["🌱 Organic or ♻️ Paper","Biodegradable"], co2: 0.1 },
+  "coffee grounds": { bin:"compost", icon:"☕", label:"Compost", sub:"Green / organics bin or home compost", tips:["Excellent nitrogen-rich 'green' material for compost piles","Coffee filters can also be composted (paper filters only)","Can also be used directly as garden fertilizer or to deter pests"], tags:["Returns nutrients to soil","🌱 Organic"], co2: 0.05 },
+  "medicine": { bin:"special", icon:"💊", label:"Special — Medication Drop-off", sub:"Pharmacy take-back program", tips:["Never flush medications down the toilet — contaminates water supply","Many pharmacies (CVS, Walgreens) have free safe medication disposal kiosks","DEA National Prescription Drug Take-Back events happen twice a year"], tags:["Prevents water contamination","⚠️ Pharmaceutical waste"], co2: 0 },
+};
+
+const GENERIC_RULES = {
+  plastic: { bin:"recycle", icon:"♳", label:"Likely Recyclable", sub:"Check the number on the bottom", tips:["Look for the resin code (1-7) on the bottom of the item","#1 (PET) and #2 (HDPE) are widely accepted; #3-7 vary by location","Rinse and dry before placing in recycling bin"], tags:["Check resin code","♻️ Plastic stream"], co2: 0.15 },
+  food: { bin:"compost", icon:"🥗", label:"Compost", sub:"Organics / green bin", tips:["Food scraps are perfect for composting — diverts methane from landfill","Keep a small countertop bin to collect scraps, then transfer weekly","No meat, dairy, or oily foods in home compost — fine for municipal programs"], tags:["🌱 Organic","Reduces methane"], co2: 0.05 },
+  paper: { bin:"recycle", icon:"📄", label:"Recycle", sub:"Paper recycling bin", tips:["Most clean, dry paper products are recyclable","Avoid recycling shredded paper (put it in compost instead)","Wet or food-soiled paper goes in landfill or compost"], tags:["♻️ Paper stream","Saves trees"], co2: 0.2 },
+  electronic: { bin:"special", icon:"💻", label:"E-Waste", sub:"Electronics drop-off or recycler", tips:["Electronics contain valuable and toxic materials — never landfill","Use Earth911.com to find the nearest e-waste recycler","Many manufacturers offer free take-back programs"], tags:["⚡ E-Waste","Recovers metals"], co2: 0.4 },
+  battery: { bin:"special", icon:"🔋", label:"Special Disposal", sub:"Battery drop-off point", tips:["All batteries should go to designated collection points","Many grocery and hardware stores have free battery bins","Tape terminals to prevent accidental discharge"], tags:["⚠️ Hazardous","Recovers metals"], co2: 0.1 },
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let logItems = JSON.parse(localStorage.getItem('ts_log') || '[]');
+let currentResult = null;
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'tracker') renderTracker();
+  if (tab === 'impact') renderImpact();
+}
+
+// ── SCAN ──────────────────────────────────────────────────────────────────────
+function quickSearch(name) {
+  document.getElementById('itemInput').value = name;
+  analyzeItem();
+}
+
+function analyzeItem() {
+  const val = document.getElementById('itemInput').value.trim();
+  if (!val) return;
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  document.getElementById('resultBox').classList.remove('visible');
+  document.getElementById('loadingEl').classList.add('visible');
+
+  setTimeout(() => {
+    const result = lookupItem(val);
+    currentResult = { ...result, name: val };
+    document.getElementById('loadingEl').classList.remove('visible');
+    btn.disabled = false;
+    showResult(result, val);
+  }, 900 + Math.random() * 400);
+}
+
+function lookupItem(input) {
+  const key = input.toLowerCase().trim();
+
+  // Direct match
+  if (DISPOSAL_DB[key]) return DISPOSAL_DB[key];
+
+  // Partial key match
+  for (const [dbKey, data] of Object.entries(DISPOSAL_DB)) {
+    if (key.includes(dbKey) || dbKey.includes(key)) return data;
+  }
+
+  // Keyword inference
+  const keywords = {
+    plastic: ['plastic','container','bottle','tub','lid','wrapper'],
+    food: ['peel','leftover','fruit','vegetable','scrap','coffee','tea','compost'],
+    paper: ['paper','envelope','receipt','book','magazine','cardboard'],
+    electronic: ['laptop','computer','tablet','tv','monitor','cable','charger','printer'],
+    battery: ['battery','batteries'],
+  };
+
+  for (const [type, words] of Object.entries(keywords)) {
+    if (words.some(w => key.includes(w))) return GENERIC_RULES[type];
+  }
+
+  // Default
+  return {
+    bin: "landfill",
+    icon: "🗑️",
+    label: "Likely Landfill",
+    sub: "Check your local waste guidelines",
+    tips: [
+      "We couldn't find a specific rule — when in doubt, landfill is safest to avoid contaminating recycling",
+      "Search Earth911.com or your local municipality website for specific disposal rules",
+      "Consider if the item can be repaired, donated, or repurposed before discarding"
+    ],
+    tags: ["Check local rules","Earth911.com"],
+    co2: 0
+  };
+}
+
+function showResult(data, name) {
+  const binColors = { recycle:'#1a3a5c', compost:'#2a3a0a', landfill:'#3a2a0a', special:'#2a1a3a' };
+  const badge = document.getElementById('binBadge');
+  badge.className = 'bin-badge ' + data.bin;
+  document.getElementById('binIcon').textContent = data.icon;
+  document.getElementById('binLabel').textContent = data.label;
+  document.getElementById('binSub').textContent = data.sub;
+
+  const tips = document.getElementById('tipsList');
+  tips.innerHTML = data.tips.map(t => `<li>${t}</li>`).join('');
+
+  const tags = document.getElementById('impactTags');
+  tags.innerHTML = data.tags.map(t => `<span class="impact-tag">${t}</span>`).join('');
+
+  document.getElementById('resultBox').classList.add('visible');
+  document.getElementById('resultBox').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function clearResult() {
+  document.getElementById('resultBox').classList.remove('visible');
+  document.getElementById('itemInput').value = '';
+  currentResult = null;
+}
+
+function logCurrentItem() {
+  if (!currentResult) return;
+  const item = {
+    name: currentResult.name,
+    category: currentResult.bin,
+    icon: currentResult.icon,
+    co2: currentResult.co2 || 0,
+    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    ts: Date.now()
+  };
+  logItems.unshift(item);
+  if (logItems.length > 100) logItems = logItems.slice(0, 100);
+  saveLog();
+  showToast('✓ Logged: ' + item.name);
+  document.getElementById('logBtn').textContent = '✓ Logged!';
+  setTimeout(() => { document.getElementById('logBtn').textContent = '✓ Log this item'; }, 2000);
+}
+
+// ── TRACKER ───────────────────────────────────────────────────────────────────
+function addLogItem() {
+  const name = document.getElementById('logItemName').value.trim();
+  const cat = document.getElementById('logCategory').value;
+  if (!name) return;
+  const catData = { recycle:{ icon:'♻️', co2:.2 }, compost:{ icon:'🌱', co2:.05 }, landfill:{ icon:'🗑️', co2:0 }, special:{ icon:'⚡', co2:.15 } };
+  const item = {
+    name, category: cat,
+    icon: catData[cat].icon,
+    co2: catData[cat].co2,
+    date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    ts: Date.now()
+  };
+  logItems.unshift(item);
+  saveLog();
+  document.getElementById('logItemName').value = '';
+  renderTracker();
+  showToast('✓ Item logged!');
+}
+
+function saveLog() {
+  localStorage.setItem('ts_log', JSON.stringify(logItems));
+}
+
+function renderTracker() {
+  const total = logItems.length;
+  const recycled = logItems.filter(i => i.category === 'recycle').length;
+  const composted = logItems.filter(i => i.category === 'compost').length;
+  const streak = computeStreak();
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statRecycle').textContent = recycled;
+  document.getElementById('statCompost').textContent = composted;
+  document.getElementById('statStreak').textContent = streak + '🔥';
+
+  // Streak bar (last 14 days)
+  const bar = document.getElementById('streakBar');
+  const today = new Date();
+  bar.innerHTML = '';
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const label = d.toLocaleDateString('en-US', { weekday:'short' }).charAt(0);
+    const dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    const hasItem = logItems.some(item => item.date === dateStr);
+    bar.innerHTML += `<div class="streak-day ${hasItem ? 'done' : ''}">${hasItem ? '✓' : label}</div>`;
+  }
+
+  // Log list
+  const list = document.getElementById('logList');
+  if (logItems.length === 0) {
+    list.innerHTML = '<li style="color:var(--text-muted); font-size:.9rem; padding:16px 0; text-align:center;">No items logged yet. Start scanning!</li>';
+  } else {
+    list.innerHTML = logItems.slice(0, 20).map(item => `
+      <li class="log-item">
+        <div class="log-item-left">
+          <span class="log-item-icon">${item.icon}</span>
+          <div>
+            <div class="log-item-name">${item.name}</div>
+            <div class="log-item-meta">${item.date}</div>
+          </div>
+        </div>
+        <span class="log-item-badge badge-${item.category}">${item.category}</span>
+      </li>`).join('');
+  }
+
+  // Badges
+  renderBadges();
+}
+
+function computeStreak() {
+  if (logItems.length === 0) return 0;
+  const today = new Date();
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const dateStr = d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    if (logItems.some(item => item.date === dateStr)) streak++;
+    else if (i > 0) break;
+  }
+  return streak;
+}
+
+const BADGES = [
+  { id:'first', emoji:'🌱', name:'First Step', desc:'Log your first item', earned: () => logItems.length >= 1 },
+  { id:'ten', emoji:'🔟', name:'Ten Items', desc:'Log 10 items total', earned: () => logItems.length >= 10 },
+  { id:'recycler', emoji:'♻️', name:'Recycler', desc:'Recycle 5 items', earned: () => logItems.filter(i => i.category==='recycle').length >= 5 },
+  { id:'composter', emoji:'🌿', name:'Composter', desc:'Compost 3 items', earned: () => logItems.filter(i => i.category==='compost').length >= 3 },
+  { id:'streak3', emoji:'🔥', name:'3-Day Streak', desc:'Log items 3 days in a row', earned: () => computeStreak() >= 3 },
+  { id:'streak7', emoji:'🏆', name:'Week Warrior', desc:'Log items 7 days straight', earned: () => computeStreak() >= 7 },
+  { id:'special', emoji:'⚡', name:'Hazard Hero', desc:'Properly dispose a hazardous item', earned: () => logItems.some(i => i.category==='special') },
+  { id:'eco100', emoji:'🌍', name:'Eco Century', desc:'Log 100 items total', earned: () => logItems.length >= 100 },
+];
+
+function renderBadges() {
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const earned = b.earned();
+    return `<div class="badge-card ${earned ? 'earned' : 'locked'}">
+      <span class="badge-emoji">${b.emoji}</span>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+      ${earned ? '<div class="badge-earned-tag">✓ Earned</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── IMPACT ────────────────────────────────────────────────────────────────────
+function renderImpact() {
+  const total = logItems.length;
+  const co2Saved = logItems.reduce((sum, i) => sum + (i.co2 || 0), 0).toFixed(1);
+  const recycled = logItems.filter(i => i.category === 'recycle').length;
+  const composted = logItems.filter(i => i.category === 'compost').length;
+  const special = logItems.filter(i => i.category === 'special').length;
+  const landfill = logItems.filter(i => i.category === 'landfill').length;
+
+  const impactEl = document.getElementById('impactDetails');
+  if (total === 0) {
+    impactEl.innerHTML = '<p style="color:var(--text-dim); font-size:.9rem;">Log items in the tracker to see your impact grow here.</p>';
+  } else {
+    const trees = (recycled * 0.02).toFixed(2);
+    const water = (recycled * 1.5).toFixed(1);
+    impactEl.innerHTML = `
+      <div style="display:grid; gap:12px;">
+        <div class="co2-equiv"><div class="co2-icon">💨</div><div class="co2-text">Estimated <strong>${co2Saved} kg CO₂</strong> equivalent saved through proper disposal.</div></div>
+        <div class="co2-equiv"><div class="co2-icon">🌳</div><div class="co2-text">Your recycling has helped save approximately <strong>${trees} trees</strong> worth of resources.</div></div>
+        <div class="co2-equiv"><div class="co2-icon">💧</div><div class="co2-text">Roughly <strong>${water} gallons of water</strong> conserved compared to using virgin materials.</div></div>
+      </div>`;
+  }
+
+  // Breakdown chart
+  const chartEl = document.getElementById('breakdownChart');
+  const cats = [
+    { label:'Recycled', count: recycled, color: 'var(--blue)', emoji:'♻️' },
+    { label:'Composted', count: composted, color: 'var(--green)', emoji:'🌱' },
+    { label:'Special Disposal', count: special, color: '#c4b5fd', emoji:'⚡' },
+    { label:'Landfill', count: landfill, color: 'var(--red)', emoji:'🗑️' },
+  ];
+  const max = Math.max(...cats.map(c => c.count), 1);
+  chartEl.innerHTML = cats.map(c => `
+    <div>
+      <div class="progress-label">
+        <span>${c.emoji} ${c.label}</span>
+        <span style="color:var(--text)">${c.count} items</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" style="width:${(c.count/max)*100}%; background:${c.color};"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderTracker();
+</script>
+</body>
+</html>
